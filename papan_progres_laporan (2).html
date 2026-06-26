@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Monitoring Laporan NOP-FPKMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F2E9;
+    --paper-soft:#EFE9DA;
+    --ink:#23262B;
+    --ink-soft:#6B6F76;
+    --navy:#2C3E63;
+    --slate:#8B92A1;
+    --amber:#C97E14;
+    --sky:#2F6F9E;
+    --forest:#2F6F4F;
+    --rust:#A8392E;
+    --line:#D9D2BF;
+    --card-shadow: 0 1px 0 rgba(35,38,43,0.06);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    padding:32px 24px 60px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  .hero{
+    position:relative;
+    overflow:hidden;
+    border-radius:16px;
+    min-height:240px;
+    margin-bottom:28px;
+    border:1px solid var(--line);
+    box-shadow:0 2px 14px rgba(35,38,43,0.10);
+  }
+  .hero svg.bg{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  .hero-content{
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:flex-end;
+    width:100%;
+    height:100%;
+    min-height:240px;
+    padding:22px;
+    box-sizing:border-box;
+  }
+  .title-plate{
+    background:rgba(246,242,233,0.93);
+    border-radius:12px;
+    padding:16px 22px;
+    box-shadow:0 4px 16px rgba(20,22,12,0.18);
+    max-width:560px;
+  }
+  .title-block h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:30px;
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+  }
+  .title-block p{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:13.5px;
+    letter-spacing:.02em;
+  }
+  .whoami{
+    position:absolute;
+    top:16px;
+    right:16px;
+    z-index:3;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    background:rgba(255,255,255,0.92);
+    padding:8px 12px;
+    border-radius:9px;
+    box-shadow:0 2px 10px rgba(20,22,12,0.15);
+  }
+  .whoami input{
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    padding:6px 10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:#fff;
+    width:130px;
+  }
+
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin-bottom:28px;
+  }
+  .stat-card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+    box-shadow:var(--card-shadow);
+    position:relative;
+    overflow:hidden;
+  }
+  .stat-card .num{
+    font-family:'Fraunces',serif;
+    font-size:30px;
+    font-weight:600;
+    line-height:1;
+  }
+  .stat-card .label{
+    font-size:12px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    margin-top:4px;
+  }
+  .stat-card.accent-navy{border-top:3px solid var(--navy);}
+  .stat-card.accent-forest{border-top:3px solid var(--forest);}
+  .stat-card.accent-amber{border-top:3px solid var(--amber);}
+  .stat-card.accent-rust{border-top:3px solid var(--rust);}
+
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .toolbar .actions{display:flex;gap:10px;}
+  button{
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:#fff;
+    padding:9px 16px;
+    border-radius:7px;
+    cursor:pointer;
+  }
+  button.secondary{
+    background:transparent;
+    color:var(--ink);
+  }
+  button.ghost{
+    border:none;
+    background:transparent;
+    color:var(--ink-soft);
+    padding:4px 6px;
+    font-weight:500;
+  }
+  button.ghost:hover{color:var(--rust);}
+  button:disabled{opacity:.5;cursor:not-allowed;}
+
+  .sync-note{font-size:12px;color:var(--ink-soft);}
+  .auto-refresh-note{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+    font-style:italic;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  thead th{
+    text-align:left;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    background:var(--paper-soft);
+    padding:10px 12px;
+    border-bottom:1px solid var(--line);
+  }
+  tbody tr{border-bottom:1px solid var(--line);}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr.overdue{background:#FBF0EE;}
+  td{padding:10px 12px;vertical-align:top;font-size:13.5px;}
+
+  td input[type="text"], td input[type="date"], td textarea, td select{
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    border:1px solid transparent;
+    background:transparent;
+    padding:4px 6px;
+    border-radius:5px;
+    width:100%;
+  }
+  td input[type="text"]:hover, td input[type="date"]:hover, td textarea:hover, td select:hover{
+    border-color:var(--line);
+    background:#fafaf7;
+  }
+  td input[type="text"]:focus, td input[type="date"]:focus, td textarea:focus, td select:focus{
+    border-color:var(--navy);
+    background:#fff;
+    outline:none;
+  }
+  td textarea{resize:vertical;min-height:36px;font-family:'Inter',sans-serif;}
+
+  .col-name{min-width:180px;}
+  .col-task{min-width:230px;}
+  .col-status{min-width:130px;}
+  .col-progress{min-width:140px;}
+  .col-deadline{min-width:120px;}
+  .col-pic{min-width:210px;}
+  .pic-toggle{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:20px;
+    padding:3px 9px 3px 6px;
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .pic-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+  .pic-row:last-child{margin-bottom:0;}
+  .pic-name{
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:3px 7px;
+    width:110px;
+    background:#fafaf7;
+  }
+  .pic-name:focus{border-color:var(--navy);background:#fff;outline:none;}
+
+  .task-row{display:flex;align-items:flex-start;gap:7px;margin-bottom:6px;}
+  .task-row:last-child{margin-bottom:0;}
+  .task-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    flex:none;
+    margin-top:4px;
+    font-size:11px;
+    font-weight:600;
+    color:#fff;
+    padding:3px 8px 3px 6px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  .task-tag .dot{width:8px;height:8px;border-radius:50%;background:#fff;}
+  .task-input{
+    flex:1;
+    font-family:'Inter',sans-serif;
+    font-size:12.5px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:5px 8px;
+    min-height:32px;
+    resize:vertical;
+    background:#fafaf7;
+  }
+  .task-input:focus{border-color:var(--navy);background:#fff;outline:none;}
+  .task-empty{font-size:12px;color:var(--ink-soft);font-style:italic;}
+  .pic-toggle .dot{
+    width:10px;height:10px;
+    border-radius:50%;
+    flex:none;
+  }
+  .pic-toggle.active{
+    color:#fff;
+    border-color:transparent;
+  }
+  .pic-toggle.active .dot{background:#fff;}
+  .pic-legend{
+    display:flex;
+    gap:16px;
+    align-items:center;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+  }
+  .pic-legend .item{display:flex;align-items:center;gap:6px;}
+  .pic-legend .dot{width:10px;height:10px;border-radius:50%;}
+  .col-meta{min-width:130px;font-size:11.5px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;}
+  .col-link{min-width:90px;text-align:center;}
+  .link-icon{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:30px;height:30px;
+    border:1px solid var(--line);
+    border-radius:7px;
+    color:var(--navy);
+    text-decoration:none;
+    font-size:15px;
+    background:#fafaf7;
+  }
+  .link-icon:hover{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .link-icon.empty{color:var(--ink-soft);}
+  .link-edit{display:none;}
+  .link-cell:hover .link-edit{display:block;margin-top:4px;}
+  .link-edit input{font-size:11px;}
+
+  .badge{
+    display:inline-block;
+    font-size:11px;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:20px;
+    color:#fff;
+  }
+  .badge.belum{background:var(--slate);}
+  .badge.proses{background:var(--amber);}
+  .badge.review{background:var(--sky);}
+  .badge.selesai{background:var(--forest);}
+
+  .ruler{
+    position:relative;
+    height:14px;
+    border:1px solid var(--ink);
+    border-radius:3px;
+    background:repeating-linear-gradient(to right, transparent 0, transparent calc(25% - 1px), var(--line) calc(25% - 1px), var(--line) 25%);
+    overflow:hidden;
+    margin-bottom:4px;
+  }
+  .ruler .fill{
+    position:absolute;top:0;left:0;bottom:0;
+    transition:width .2s ease;
+  }
+  .ruler .fill.belum{background:var(--slate);}
+  .ruler .fill.proses{background:var(--amber);}
+  .ruler .fill.review{background:var(--sky);}
+  .ruler .fill.selesai{background:var(--forest);}
+  .progress-row{display:flex;align-items:center;gap:8px;}
+  .progress-row input[type="number"]{
+    width:54px;flex:none;
+    font-family:'IBM Plex Mono',monospace;
+    text-align:right;
+  }
+  .progress-row .pct{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
+
+  .overdue-tag{
+    display:inline-block;
+    margin-top:3px;
+    font-size:10.5px;
+    font-weight:600;
+    color:var(--rust);
+  }
+
+  .empty-state{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--ink-soft);
+  }
+  .empty-state .face{font-family:'Fraunces',serif;font-size:22px;color:var(--ink);margin-bottom:6px;}
+
+  .loading{padding:40px;text-align:center;color:var(--ink-soft);font-size:13px;}
+
+  footer{
+    margin-top:18px;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <svg class="bg" viewBox="0 0 1600 320" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#EFEAD8"/>
+          <stop offset="55%" stop-color="#DCE6C8"/>
+          <stop offset="100%" stop-color="#C3D6AC"/>
+        </linearGradient>
+        <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#8A6B45"/>
+          <stop offset="100%" stop-color="#6B5132"/>
+        </linearGradient>
+        <linearGradient id="groundFade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1B2A13" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#13200E" stop-opacity="0.45"/>
+        </linearGradient>
+
+        <!-- satu pelepah melengkung+merunduk di ujung, dipakai berulang dgn rotasi -->
+        <path id="frond" d="M0,0 C 26,-14 62,-12 88,8 C 70,22 38,28 12,20 C 4,13 0,5 0,0 Z"/>
+
+        <symbol id="frondCluster" viewBox="-110 -110 220 220">
+          <g fill="currentColor">
+            <use href="#frond" transform="rotate(-162)"/>
+            <use href="#frond" transform="rotate(-126)"/>
+            <use href="#frond" transform="rotate(-90)"/>
+            <use href="#frond" transform="rotate(-54)"/>
+            <use href="#frond" transform="rotate(-18)"/>
+            <use href="#frond" transform="rotate(18)"/>
+            <use href="#frond" transform="rotate(54)"/>
+            <use href="#frond" transform="rotate(90)"/>
+            <use href="#frond" transform="rotate(126)"/>
+            <use href="#frond" transform="rotate(162)"/>
+          </g>
+        </symbol>
+
+        <symbol id="palm" viewBox="-110 -110 220 250">
+          <use href="#frondCluster"/>
+          <path d="M-7,140 Q-12,75 -3,0 L3,0 Q12,75 7,140 Z" fill="currentColor"/>
+        </symbol>
+
+        <symbol id="fruitBunch" viewBox="-40 -35 80 70">
+          <circle cx="-15" cy="-10" r="8" fill="#E07A2E"/>
+          <circle cx="0" cy="-15" r="7" fill="#C8551E"/>
+          <circle cx="15" cy="-8" r="8" fill="#9C3414"/>
+          <circle cx="-22" cy="4" r="7" fill="#7A2A12"/>
+          <circle cx="-4" cy="1" r="9" fill="#E07A2E"/>
+          <circle cx="13" cy="7" r="8" fill="#C8551E"/>
+          <circle cx="-13" cy="18" r="7" fill="#9C3414"/>
+          <circle cx="4" cy="20" r="8" fill="#7A2A12"/>
+          <circle cx="20" cy="15" r="6" fill="#E07A2E"/>
+          <circle cx="-26" cy="-4" r="6" fill="#C8551E"/>
+        </symbol>
+
+        <symbol id="palmDetailed" viewBox="-110 -130 220 270">
+          <path d="M-9,150 Q-15,80 -4,0 L4,0 Q15,80 9,150 Z" fill="#5C432A"/>
+          <g stroke="#3A2A18" stroke-width="3" fill="none" opacity="0.55">
+            <path d="M-7,28 l10,5"/>
+            <path d="M7,52 l-10,5"/>
+            <path d="M-7,76 l10,5"/>
+            <path d="M7,100 l-10,5"/>
+            <path d="M-7,124 l10,5"/>
+          </g>
+          <g fill="#33502B">
+            <use href="#frond" transform="rotate(-162)"/>
+            <use href="#frond" transform="rotate(-126)"/>
+            <use href="#frond" transform="rotate(-90)"/>
+            <use href="#frond" transform="rotate(-54)"/>
+            <use href="#frond" transform="rotate(-18)"/>
+            <use href="#frond" transform="rotate(18)"/>
+            <use href="#frond" transform="rotate(54)"/>
+            <use href="#frond" transform="rotate(90)"/>
+            <use href="#frond" transform="rotate(126)"/>
+            <use href="#frond" transform="rotate(162)"/>
+          </g>
+          <use href="#fruitBunch" transform="translate(-12,-8) scale(0.7)"/>
+        </symbol>
+      </defs>
+
+      <rect width="1600" height="320" fill="url(#skyGrad)"/>
+
+      <!-- kerimbunan kanopi jauh, berlapis untuk efek hutan sawit yang rapat -->
+      <g style="color:#A9BC92" opacity="0.45">
+        <use href="#frondCluster" transform="translate(220,70) scale(2.6)"/>
+        <use href="#frondCluster" transform="translate(650,40) scale(2.3)"/>
+        <use href="#frondCluster" transform="translate(1080,75) scale(2.7)"/>
+        <use href="#frondCluster" transform="translate(1450,45) scale(2.2)"/>
+      </g>
+      <g style="color:#6E8957" opacity="0.55">
+        <use href="#frondCluster" transform="translate(420,110) scale(2.1)"/>
+        <use href="#frondCluster" transform="translate(860,95) scale(2.4)"/>
+        <use href="#frondCluster" transform="translate(1260,115) scale(2.0)"/>
+      </g>
+
+      <!-- baris pohon jauh -->
+      <g style="color:#9CAE89" opacity="0.6">
+        <use href="#palm" transform="translate(60,225) scale(0.30)"/>
+        <use href="#palm" transform="translate(230,230) scale(0.33)"/>
+        <use href="#palm" transform="translate(400,223) scale(0.29)"/>
+        <use href="#palm" transform="translate(580,228) scale(0.34)"/>
+        <use href="#palm" transform="translate(760,224) scale(0.31)"/>
+        <use href="#palm" transform="translate(940,229) scale(0.33)"/>
+        <use href="#palm" transform="translate(1120,223) scale(0.30)"/>
+        <use href="#palm" transform="translate(1300,230) scale(0.32)"/>
+        <use href="#palm" transform="translate(1480,225) scale(0.31)"/>
+      </g>
+
+      <!-- baris pohon tengah -->
+      <g style="color:#4F6B3F" opacity="0.9">
+        <use href="#palm" transform="translate(130,262) scale(0.62)"/>
+        <use href="#palm" transform="translate(350,268) scale(0.68)"/>
+        <use href="#palm" transform="translate(570,260) scale(0.58)"/>
+        <use href="#palm" transform="translate(800,267) scale(0.66)"/>
+        <use href="#palm" transform="translate(1020,259) scale(0.61)"/>
+        <use href="#palm" transform="translate(1240,266) scale(0.65)"/>
+        <use href="#palm" transform="translate(1460,260) scale(0.59)"/>
+      </g>
+
+      <rect width="1600" height="320" fill="url(#groundFade)"/>
+      <rect x="0" y="270" width="1600" height="50" fill="url(#groundGrad)"/>
+
+      <!-- tandan buah segar tergeletak di tanah, seperti pada foto referensi -->
+      <use href="#fruitBunch" transform="translate(760,298) scale(1.4)"/>
+
+      <!-- dua pohon close-up di pojok sebagai foreground, meniru sudut foto bawah pohon -->
+      <use href="#palmDetailed" transform="translate(100,335) scale(1.7)"/>
+      <use href="#palmDetailed" transform="translate(1525,340) scale(-1.85,1.85)"/>
+    </svg>
+
+    <div class="whoami">
+      <span>Nama Anda:</span>
+      <input id="myName" type="text" placeholder="cth. Sari">
+    </div>
+
+    <div class="hero-content">
+      <div class="title-plate">
+        <div class="title-block">
+          <h1>Monitoring Laporan NOP-FPKMS</h1>
+          <p>Sub Bagian UPJKP · PPKS-PT RPN</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="toolbar">
+    <div class="actions">
+      <button id="addBtn">+ Tambah Laporan</button>
+      <button id="refreshBtn" class="secondary">Muat Ulang Data</button>
+    </div>
+    <span class="sync-note" id="syncNote"></span>
+  </div>
+  <div class="auto-refresh-note">🔄 Auto-refresh aktif setiap 20 detik (otomatis berhenti sementara saat Anda sedang mengetik)</div>
+
+  <div class="pic-legend">
+    <span>PIC:</span>
+    <span class="item"><span class="dot" style="background:#10B981"></span>Agro — Peneliti Agronomi</span>
+    <span class="item"><span class="dot" style="background:#F97316"></span>Sosek — Peneliti Sosio Ekonomi</span>
+    <span class="item"><span class="dot" style="background:#7C3AED"></span>Data — Pelaksana Data</span>
+  </div>
+
+  <div id="tableHolder">
+    <div class="loading">Memuat data...</div>
+  </div>
+
+  <footer>Data tersimpan bersama (shared) — semua orang yang membuka papan ini bisa melihat dan mengubah datanya.</footer>
+</div>
+
+<script>
+const STORAGE_KEY = 'reports-v1';
+let reports = [];
+let loaded = false;
+
+const PIC_ROLES = [
+  {key:'agro', label:'Agro', color:'#10B981'},
+  {key:'sosek', label:'Sosek', color:'#F97316'},
+  {key:'data', label:'Data', color:'#7C3AED'}
+];
+const statusLabel = {belum:'Belum Mulai', proses:'Sedang Proses', review:'Review', selesai:'Selesai'};
+const statusOrder = ['belum','proses','review','selesai'];
+
+const SEED_REPORTS = [
+  {name:'Draft Laporan PT BSP', status:'proses', progress:0, link:'https://1drv.ms/w/c/69cc205e77f5da37/IQDZ_fUDK0UyRbtK5SjtM5KWAV8bpmkiNmNtknrHIpcFh_M?e=Le01Lq'},
+  {name:'Draft Laporan PT Sasongko', status:'proses', progress:0, link:'https://1drv.ms/w/c/69cc205e77f5da37/IQD1htDlnikGQJqoemPr8r8mAXUa9fQrTAXG5EXU16gh3kQ?e=Edl31L'},
+  {name:'Draft Laporan PT RBN', status:'proses', progress:0, link:'https://1drv.ms/w/c/69cc205e77f5da37/IQDXrdfNiT-7T4ExXyHQVNESAYtPfBQNoBtKQOQEHfKRixs?e=OC78La'},
+  {name:'Draft Laporan PT SLJ', status:'proses', progress:0, link:'https://1drv.ms/w/c/69cc205e77f5da37/IQARNg32G0w3RbZsD8HHbX7BAUQKs9TMSP66jHcHtISFJxk?e=1BkC4w'},
+  {name:'Draft Laporan PT WPG', status:'proses', progress:0, link:'https://1drv.ms/w/c/69cc205e77f5da37/IQCHNnhoVzXJR5JsD7PLckMRAV_nMEDrfKeAgov_G-Faiwo?e=dqxdo4'},
+  {name:'Draft Laporan PT AMS', status:'proses', progress:0, link:'https://1drv.ms/w/c/69cc205e77f5da37/IQD0d6a2KAMLTZMvzCvcpuL1AUoCdOs6Pg4ofsGuYETifKM?e=KU1TBj'},
+  {name:'Draft Laporan PT SMS', status:'proses', progress:0, task:'On Progress', link:'https://1drv.ms/w/c/69cc205e77f5da37/IQDswZ6q64QoQbXgkXzZeCkNAVhdhth_fF9gwtXXPCLe4wA?e=tPP2if'}
+];
+
+function uid(){ return 'r' + Math.random().toString(36).slice(2,9); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function nowLabel(){
+  const d = new Date();
+  return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}) + ' ' + d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+}
+function isOverdue(r){
+  return r.deadline && r.status !== 'selesai' && r.deadline < todayISO();
+}
+
+async function loadMyName(){
+  try{
+    const res = await window.storage.get('my-name', false);
+    if(res && res.value) document.getElementById('myName').value = res.value;
+  }catch(e){ /* no name saved yet */ }
+}
+document.getElementById('myName').addEventListener('change', async (e)=>{
+  try{ await window.storage.set('my-name', e.target.value, false); }catch(err){ console.error(err); }
+});
+
+async function loadReports(){
+  document.getElementById('syncNote').textContent = 'Memuat...';
+  try{
+    const res = await window.storage.get(STORAGE_KEY, true);
+    reports = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){
+    reports = [];
+  }
+  if(reports.length===0){
+    reports = SEED_REPORTS.map(s=>({
+      id: uid(), name:s.name, pic:'', status:s.status, progress:s.progress,
+      task:s.task||'', deadline:'', link:s.link, updatedAt:nowLabel(), updatedBy:'(otomatis)'
+    }));
+    try{ await window.storage.set(STORAGE_KEY, JSON.stringify(reports), true); }catch(e){ console.error(e); }
+  }
+  loaded = true;
+  document.getElementById('syncNote').textContent = 'Tersinkron · ' + nowLabel();
+  render();
+}
+
+async function saveReports(){
+  try{
+    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(reports), true);
+    if(!result) console.error('Gagal menyimpan data');
+    document.getElementById('syncNote').textContent = 'Tersimpan · ' + nowLabel();
+  }catch(e){
+    console.error('Storage error:', e);
+    document.getElementById('syncNote').textContent = 'Gagal menyimpan, coba lagi.';
+  }
+}
+
+function touch(r){
+  const who = document.getElementById('myName').value.trim();
+  r.updatedAt = nowLabel();
+  r.updatedBy = who || '(tanpa nama)';
+}
+
+function renderStats(){
+  const total = reports.length;
+  const selesai = reports.filter(r=>r.status==='selesai').length;
+  const proses = reports.filter(r=>r.status==='proses').length;
+  const overdue = reports.filter(isOverdue).length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-card accent-navy"><div class="num">${total}</div><div class="label">Total Laporan</div></div>
+    <div class="stat-card accent-forest"><div class="num">${selesai}</div><div class="label">Selesai</div></div>
+    <div class="stat-card accent-amber"><div class="num">${proses}</div><div class="label">Sedang Proses</div></div>
+    <div class="stat-card accent-rust"><div class="num">${overdue}</div><div class="label">Terlambat</div></div>
+  `;
+}
+
+function rowHTML(r){
+  const overdue = isOverdue(r);
+  const options = statusOrder.map(s=>`<option value="${s}" ${r.status===s?'selected':''}>${statusLabel[s]}</option>`).join('');
+  return `
+  <tr data-id="${r.id}" class="${overdue?'overdue':''}">
+    <td class="col-name">
+      <input type="text" value="${escapeAttr(r.name)}" data-field="name" placeholder="Nama laporan">
+    </td>
+    <td class="col-pic">
+      ${picBadgesHTML(r)}
+    </td>
+    <td class="col-status">
+      <select data-field="status">${options}</select>
+      <div><span class="badge ${r.status}">${statusLabel[r.status]}</span></div>
+    </td>
+    <td class="col-progress">
+      <div class="ruler"><div class="fill ${r.status}" style="width:${r.progress}%"></div></div>
+      <div class="progress-row">
+        <input type="number" min="0" max="100" value="${r.progress}" data-field="progress">
+        <span class="pct">%</span>
+      </div>
+    </td>
+    <td class="col-task">
+      ${picTasksHTML(r)}
+    </td>
+    <td class="col-deadline">
+      <input type="date" value="${r.deadline||''}" data-field="deadline">
+      ${overdue ? '<div class="overdue-tag">Terlambat</div>' : ''}
+    </td>
+    <td class="col-link link-cell">
+      ${r.link ? `<a class="link-icon" href="${escapeAttr(r.link)}" target="_blank" rel="noopener">↗</a>` : `<span class="link-icon empty">–</span>`}
+      <div class="link-edit"><input type="text" value="${escapeAttr(r.link||'')}" data-field="link" placeholder="Tempel link..."></div>
+    </td>
+    <td class="col-meta">
+      ${escapeText(r.updatedBy||'-')}<br>${escapeText(r.updatedAt||'-')}
+    </td>
+    <td>
+      <button class="ghost" data-action="delete" title="Hapus">Hapus</button>
+    </td>
+  </tr>`;
+}
+
+function escapeAttr(s){ return (s||'').replace(/"/g,'&quot;'); }
+function escapeText(s){ return (s||'').replace(/</g,'&lt;'); }
+
+function ensurePicObj(r){
+  if(!r.pic || typeof r.pic === 'string'){
+    const old = typeof r.pic === 'string' ? r.pic.split(',').filter(Boolean) : [];
+    const obj = {};
+    PIC_ROLES.forEach(role=>{ obj[role.key] = {on: old.includes(role.key), name:'', task:''}; });
+    r.pic = obj;
+  }
+  PIC_ROLES.forEach(role=>{
+    if(!r.pic[role.key]) r.pic[role.key] = {on:false, name:'', task:''};
+    if(r.pic[role.key].task===undefined) r.pic[role.key].task = '';
+  });
+}
+
+function picBadgesHTML(r){
+  ensurePicObj(r);
+  return PIC_ROLES.map(role=>{
+    const entry = r.pic[role.key];
+    const style = entry.on ? `background:${role.color};` : '';
+    const nameInput = entry.on ? `<input type="text" class="pic-name" value="${escapeAttr(entry.name)}" data-pic-name="${role.key}" placeholder="Nama ${role.label}...">` : '';
+    return `<div class="pic-row">
+      <span class="pic-toggle ${entry.on?'active':''}" data-pic="${role.key}" style="${style}">
+        <span class="dot" style="${entry.on?'':'background:'+role.color}"></span>${role.label}
+      </span>
+      ${nameInput}
+    </div>`;
+  }).join('');
+}
+
+function picTasksHTML(r){
+  ensurePicObj(r);
+  const activeRoles = PIC_ROLES.filter(role=>r.pic[role.key].on);
+  if(activeRoles.length===0){
+    return `<div class="task-empty">Pilih PIC dahulu di kolom sebelah</div>`;
+  }
+  return activeRoles.map(role=>{
+    const entry = r.pic[role.key];
+    return `<div class="task-row">
+      <span class="task-tag" style="background:${role.color}"><span class="dot"></span>${role.label}</span>
+      <textarea class="task-input" data-pic-task="${role.key}" placeholder="Apa yang sedang dikerjakan ${role.label}...">${escapeText(entry.task)}</textarea>
+    </div>`;
+  }).join('');
+}
+
+function render(){
+  renderStats();
+  const holder = document.getElementById('tableHolder');
+  if(!loaded){
+    holder.innerHTML = '<div class="loading">Memuat data...</div>';
+    return;
+  }
+  if(reports.length===0){
+    holder.innerHTML = `<div class="empty-state"><div class="face">Belum ada laporan di papan ini</div>Klik "+ Tambah Laporan" untuk mulai memantau progres.</div>`;
+    return;
+  }
+  holder.innerHTML = `
+  <table>
+    <thead>
+      <tr>
+        <th class="col-name">Nama Laporan</th>
+        <th class="col-pic">PIC</th>
+        <th class="col-status">Status</th>
+        <th class="col-progress">Progres</th>
+        <th class="col-task">Sedang Dikerjakan</th>
+        <th class="col-deadline">Deadline</th>
+        <th class="col-link">Lampiran</th>
+        <th class="col-meta">Update Terakhir</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      ${reports.map(rowHTML).join('')}
+    </tbody>
+  </table>`;
+
+  holder.querySelectorAll('tr[data-id]').forEach(tr=>{
+    const id = tr.getAttribute('data-id');
+    const r = reports.find(x=>x.id===id);
+
+    tr.querySelectorAll('.pic-toggle').forEach(badge=>{
+      badge.addEventListener('click', async ()=>{
+        const key = badge.getAttribute('data-pic');
+        ensurePicObj(r);
+        r.pic[key].on = !r.pic[key].on;
+        touch(r);
+        render();
+        await saveReports();
+      });
+    });
+
+    tr.querySelectorAll('.pic-name').forEach(input=>{
+      input.addEventListener('change', async (e)=>{
+        const key = e.target.getAttribute('data-pic-name');
+        ensurePicObj(r);
+        r.pic[key].name = e.target.value;
+        touch(r);
+        render();
+        await saveReports();
+      });
+    });
+
+    tr.querySelectorAll('.task-input').forEach(input=>{
+      input.addEventListener('change', async (e)=>{
+        const key = e.target.getAttribute('data-pic-task');
+        ensurePicObj(r);
+        r.pic[key].task = e.target.value;
+        touch(r);
+        render();
+        await saveReports();
+      });
+    });
+
+    tr.querySelectorAll('[data-field]').forEach(el=>{
+      el.addEventListener('change', async (e)=>{
+        const field = e.target.getAttribute('data-field');
+        let val = e.target.value;
+        if(field==='progress'){
+          val = Math.max(0, Math.min(100, parseInt(val||'0',10)));
+        }
+        r[field] = val;
+        touch(r);
+        render();
+        await saveReports();
+      });
+    });
+
+    tr.querySelector('[data-action="delete"]').addEventListener('click', async ()=>{
+      if(confirm(`Hapus laporan "${r.name||'(tanpa nama)'}"?`)){
+        reports = reports.filter(x=>x.id!==id);
+        render();
+        await saveReports();
+      }
+    });
+  });
+}
+
+document.getElementById('addBtn').addEventListener('click', async ()=>{
+  const r = {
+    id: uid(),
+    name: '',
+    pic: '',
+    status: 'belum',
+    progress: 0,
+    task: '',
+    deadline: '',
+    link: '',
+    updatedAt: '',
+    updatedBy: ''
+  };
+  touch(r);
+  reports.unshift(r);
+  render();
+  await saveReports();
+  const firstInput = document.querySelector(`tr[data-id="${r.id}"] input[data-field="name"]`);
+  if(firstInput) firstInput.focus();
+});
+
+document.getElementById('refreshBtn').addEventListener('click', loadReports);
+
+setInterval(async ()=>{
+  const active = document.activeElement;
+  const isEditing = active && ['INPUT','TEXTAREA','SELECT'].includes(active.tagName);
+  if(!isEditing && loaded){
+    await loadReports();
+  }
+}, 20000);
+
+(async function init(){
+  await loadMyName();
+  await loadReports();
+})();
+</script>
+</body>
+</html>
